@@ -4,8 +4,8 @@ import random
 import ctypes
 
 
-cards_location = './images_demo/cards/'
-hidden_card_location = './images_demo/hidden.png'
+cards_location = '/Users/enriquebarclay/Blackjack/images_demo/cards/'
+hidden_card_location = '/Users/enriquebarclay/Blackjack/images_demo/hidden.png'
 
 def collect_cards():
     cards = os.listdir(cards_location)
