@@ -114,35 +114,24 @@ class Deal():
     #This will give him another card
     #And will check if the player is busted by the end of the hit
     #########
-    def hit(self,dealer_card_2 = None, is_player = True):
-        #Bring with hidden card by default (Maybe its the dealer ? )
+    def hit(self, dealer_card_2=None, is_player=True):
         hidden_card = Card.hidden_card()
-
         if is_player:
-            #Create new label with image right there
-            new_card = Label(self.player_cards_frame, image = hidden_card,bg = background_color)
-            new_card.pack(side = RIGHT)
+            new_card = Label(self.player_cards_frame, image=hidden_card, bg=background_color)
 
-            #Call the get_card function with setting up the image of the card:
+            new_card.pack(side=RIGHT)
             card = self.get_card(card_label=new_card)
             self.update_player_score_after_hit()
-
-            #Handle busted:
             if self.player_is_busted():
-                self.player_busted_message.pack(side = TOP, anchor = 'nw')
+                self.player_busted_message.pack(side=TOP, anchor='nw')
                 self.finish_player_turn(dealer_card_2=dealer_card_2)
-
-            return card
-
-        #If its the dealer and not the player:
         else:
-            new_card = Label(self.dealer_cards_frame, image = hidden_card,bg = background_color)
-            new_card.pack(side = LEFT)
+            new_card = Label(self.dealer_cards_frame, image=hidden_card, bg=background_color)
 
-            card = self.get_card(card_label = new_card, is_player = False)
+            new_card.pack(side=LEFT)
+            card = self.get_card(card_label=new_card, is_player=False)
             self.update_dealer_score_after_hit()
-
-            return card
+        return card
 
 
 
@@ -151,9 +140,7 @@ class Deal():
     #Get players current score:
     #########
     def get_player_score(self):
-        value = 0
-        for card in self.player_cards:
-            value += card.value
+        value = sum(card.value for card in self.player_cards)
         return str(value)
 
 
@@ -162,10 +149,7 @@ class Deal():
     #Get dealers current score:
     #########
     def get_dealer_score(self):
-        value = 0
-        for card in self.dealer_cards:
-            if card.is_displayed:
-                value += card.value
+        value = sum(card.value for card in self.dealer_cards if card.is_displayed)
         return str(value)
 
 
@@ -210,20 +194,14 @@ class Deal():
     #This check will run on each hit, so we know if to continue or not
     ########
     def player_is_busted(self):
-        if int(self.get_player_score()) > 21:
-            return True
-        else:
-            return False
+        return int(self.get_player_score()) > 21
 
     ########
     #Check if Dealer is busted
     #This check will run on each hit, so we know if to continue or not
     ########
     def dealer_is_busted(self):
-        if int(self.get_dealer_score()) > 21:
-            return True
-        else:
-            return False
+        return int(self.get_dealer_score()) > 21
 
     #########
     # This will handle situations after player finished
@@ -246,9 +224,9 @@ class Deal():
     #Should stay disabled if cards value not equal
     ########
     def set_split_button_state(self):
-        player_dealt_cards = self.player_cards[0:2]
+        player_dealt_cards = self.player_cards[:2]
         if player_dealt_cards[0].value == player_dealt_cards[1].value:
-            self.split.configure(state = 'normal')
+            self.split.configure(state='normal')
         else:
             self.split.configure(state='disabled')
 
@@ -284,32 +262,26 @@ class Deal():
     def decider(self):
         player_score = int(self.get_player_score())
         dealer_score = int(self.get_dealer_score())
+        result = Label(self.deal_results_frame, text='', font=font_large, bg=background_color)
 
-
-        result = Label(self.deal_results_frame, text = '', font = font_large, bg = background_color)
-        result.pack(fill = BOTH, side = TOP)
-
+        result.pack(fill=BOTH, side=TOP)
         player_won_text = 'YOU WON!'
         dealer_won_text = 'DEALER WINS!'
-        tied_text = 'PUSH!'
-        both_busted = 'BOTH BUSTED!'
-
         if self.player_is_busted() and self.dealer_is_busted():
-            result.configure(fg = '#FFFFFF', text = both_busted)
-
+            both_busted = 'BOTH BUSTED!'
+            result.configure(fg='#FFFFFF', text=both_busted)
         if self.player_is_busted() and not self.dealer_is_busted():
-            result.configure(fg = "#FF0000", text = dealer_won_text)
-
+            result.configure(fg="#FF0000", text=dealer_won_text)
         if not self.player_is_busted() and self.dealer_is_busted():
-            result.configure(fg = "#00FF00", text = player_won_text)
-
+            result.configure(fg="#00FF00", text=player_won_text)
         if not self.player_is_busted() and not self.dealer_is_busted():
             if player_score > dealer_score:
-                result.configure(fg = "#00FF00", text = player_won_text)
+                result.configure(fg="#00FF00", text=player_won_text)
             elif player_score < dealer_score:
-                result.configure(fg = "#FF0000", text = dealer_won_text)
+                result.configure(fg="#FF0000", text=dealer_won_text)
             else:
-                result.configure(fg = '#FFFFFF', text = tied_text)
+                tied_text = 'PUSH!'
+                result.configure(fg='#FFFFFF', text=tied_text)
 
 
 
@@ -318,33 +290,20 @@ class Deal():
     #This function will check the ace count in cards of dealer or player
     ##########
     def ace_count(self, cards):
-        counter = 0
-        for card in cards:
-            if str(card.name)[0] == 'A':
-                counter +=1
-        return counter
+        return sum(str(card.name)[0] == 'A' for card in cards)
 
     ##########
     #This function returns all cards instances that they are Aces
     ##########
-    def all_aces(self,cards):
-        aces = []
-        for card in cards:
-            if str(card.name)[0] == 'A':
-                aces.append(card)
-        return aces
+    def all_aces(self, cards):
+        return [card for card in cards if str(card.name)[0] == 'A']
 
 
     ##########
     #This function returns all cards instances that they are NOT Aces
     ##########
-    def all_not_aces_value(self,cards):
-        not_aces = 0
-        for card in cards:
-            if str(card.name)[0] != 'A':
-                not_aces += card.value
-
-        return not_aces
+    def all_not_aces_value(self, cards):
+        return sum(card.value for card in cards if str(card.name)[0] != 'A')
 
 
     ###########

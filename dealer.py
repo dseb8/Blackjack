@@ -17,7 +17,4 @@ class DealerAI():
     #Will decide if to hit or not
     ########
     def is_hit(self):
-        if int(self._dealer_score) > 17:
-            return False
-        else:
-            return True
+        return int(self._dealer_score) <= 17
